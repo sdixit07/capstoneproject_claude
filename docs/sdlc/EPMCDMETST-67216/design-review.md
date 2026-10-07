@@ -39,5 +39,15 @@ No BLOCKERs.
 | NFR-4 | `ProductControllerIT` additions | Gap on body assertions (F-2, D-2) |
 | AC-1..AC-4 | 67221 / 67222 | Covered subject to D-1, D-2 |
 
+## Agreed design decisions
+| Decision ID | Outcome | Applied in |
+|-------------|---------|------------|
+| D-1 | Agreed as proposed (ACCEPTED) | architecture.md commit `442e867` |
+| D-2 | Agreed as proposed (ACCEPTED) | architecture.md commit `442e867` |
+| D-3 | Agreed as proposed (ACCEPTED) | architecture.md commit `442e867` |
+| D-4 | Agreed as proposed (ACCEPTED); no architecture change | n/a |
+| D-5 | Agreed as proposed (ACCEPTED); no architecture change, developer confirms nullability and fixtures | n/a |
+| D-6 | REJECTED by the user (scope creep; `/api/products/category` returns 400) | n/a |
+
 ## Verdict
-**APPROVED WITH CHANGES** - apply D-1, D-2, D-3 to architecture.md (D-4, D-5 need no architecture change; D-6 recommended reject). Final verdict is set in record mode.
+**APPROVED** - D-1..D-5 accepted (D-1..D-3 applied in architecture.md commit `442e867`), D-6 rejected. No open BLOCKER or MAJOR findings.
