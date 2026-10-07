@@ -40,7 +40,8 @@ Add one read-only endpoint `GET /api/products/{id}` to the existing Spring Boot 
 | Repository | `ProductRepository` | none | `findById` inherited from `JpaRepository<Product, Long>` |
 | Model | `Product`, `Category` | none | `Category.products` is already `@JsonIgnore`, so no serialisation recursion (resolves the requirements assumption) |
 | Frontend | `ProductDetail.jsx` | none | Existing consumer; 404 -> not found, other non-OK -> error |
-| Tests | `ProductControllerIT` (MockMvc, `@SpringBootTest`) | extend (67222) | Cover 200 / 404 / 400 / 0 / negative / out-of-range, plus category route regression |
+| Config | `application.properties` | add `server.error.include-message=always` (D-1) | Ensures `message` is present in default error JSON (FR-4) |
+| Tests | `ProductControllerIT` (MockMvc, `@SpringBootTest`) + new `RANDOM_PORT`/`TestRestTemplate` test class | extend (67222) | MockMvc: assert status and `resolvedException`/reason only for 200 / 404 / 400 / 0 / negative / out-of-range, plus category regression (D-2). `RANDOM_PORT` + `TestRestTemplate`: one test per error case (404, 400) asserting default JSON keys `status`, `error`, `message`, `path` (D-2). MockMvc does not run the container error dispatch, so it cannot verify the body shape (NFR-4) |
 
 ## 4. Technology choices
 | Decision | Choice | Reason | Rejected |
@@ -74,13 +75,14 @@ Client -> Controller -> Service -> Repository -> DB
   ```
 - Service: method per section 3, importing `org.springframework.web.server.ResponseStatusException` and `org.springframework.http.HttpStatus`. Keep the existing field-injection style (NFR-3).
 - Validation: type conversion only; 0 and negatives are valid Longs and result in 404 (FR-6).
+- Config (D-1): add only `server.error.include-message=always` to `application.properties`. Do not enable `include-stacktrace` or `include-binding-errors`.
 - Entity/repository: unchanged. Read-only, no write transaction (NFR-2).
 - CORS: class-level `@CrossOrigin("http://localhost:5173")` already applies to the new method (FR-8).
 
 **Frontend:** no state, API module, component or `data-testid` changes.
 
 ## 7. Route precedence vs `category/{categoryId}`
-`GET /api/products/category/5` has two path segments after `/products`; `{id}` matches a single segment, so `"{id}"` cannot capture it. Mappings `""`, `"category/{categoryId}"` and `"{id}"` are disjoint by segment count, so there is no ambiguity (FR-7). Edge case: `GET /api/products/category` (single segment) matches `{id}` with value `category`, fails Long conversion and returns 400 (before: no handler, 404/500 per Boot defaults). This is acceptable and listed in the risks. A regression test must assert `/category/{id}` still returns the list.
+`GET /api/products/category/5` has two path segments after `/products`; `{id}` matches a single segment, so `"{id}"` cannot capture it. Mappings `""`, `"category/{categoryId}"` and `"{id}"` are disjoint by segment count, so there is no ambiguity (FR-7). Edge case: `GET /api/products/category` (single segment) matches `{id}` with value `category`, fails Long conversion and returns 400 (before: no handler, 404/500 per Boot defaults); its `message` is a type-conversion message. Accepted (D-3). Decisions: keep `@GetMapping("{id}")` with plain `Long`; no regex constraint (e.g. `{id:\d+}` would break FR-5/FR-6) and no `@Positive`; no explicit `category` handler (D-6 rejected). Required tests: `GET /api/products/category` -> 400, and `GET /api/products/category/{id}` still returns the list (unaffected).
 
 ## 8. API contract
 `GET /api/products/{id}` (backward compatible; additive)
@@ -97,7 +99,7 @@ Existing endpoints unchanged.
 | Non-numeric | `abc` | 400 | `MethodArgumentTypeMismatchException` |
 | Out of range | `99999999999999999999` | 400 | same |
 
-No custom handler; the body shape is Boot's default. Caveat: Boot 3.x omits `message` by default unless `server.error.include-message` is set. The developer must check the effective config; if `message` is absent, either set only that property (minimal fix) or accept an empty message and record it in implementation notes.
+No custom handler; the body shape is Boot's default. Decision D-1: Boot 3.4 defaults to `include-message=never`, so `server.error.include-message=always` is set in `application.properties` so that `message` (e.g. "Product not found with id N") appears in the 404 and 400 bodies (FR-4). Only this property is set. Trade-off: exception messages are exposed app-wide, acceptable for this local demo app; for 400 the conversion message is exposed. `on_param` is unsuitable for the frontend.
 
 ## 10. Wireframe (consumer, unchanged)
 ```
@@ -111,8 +113,8 @@ No custom handler; the body shape is Boot's default. Caveat: Boot 3.x omits `mes
 ## 11. Risks
 | Risk | Mitigation |
 |------|-----------|
-| Boot error JSON lacks `message` by default | Verify in test/app; section 9 |
-| `/api/products/category` now 400 | Documented, low impact; add test |
+| Boot error JSON lacks `message` by default | Resolved by D-1 (`include-message=always`); verified by `RANDOM_PORT` test (D-2); section 9 |
+| `/api/products/category` now 400 | Accepted (D-3); test documents 400 and `/category/{id}` unaffected |
 | `Product` lives in root package, inconsistent with `model` | Do not move; out of scope |
 | Future lazy-loading of Category could break serialisation | Currently EAGER; no change |
 | Sub-task mapping is an assumption | Approved; adjust if Jira titles differ |
@@ -129,6 +131,16 @@ No custom handler; the body shape is Boot's default. Caveat: Boot 3.x omits `mes
 | NFR-1 | No contract break; 200 JSON, distinct 404 |
 | NFR-2 | `findById` only |
 | NFR-3 | Same layering, injection and style |
-| NFR-4 | `ProductControllerIT` additions (67222) |
+| NFR-4 | `ProductControllerIT` additions (MockMvc status + `resolvedException`) plus `RANDOM_PORT` `TestRestTemplate` body-shape tests (67222; D-2) |
 | AC-1, AC-2, AC-3 | 67221: sections 3, 6, 8, 9 |
 | AC-4 | 67222: verification against ProductDetail.jsx contract |
+
+## 13. Changes after design review
+| Decision | Outcome | What changed / where |
+|----------|---------|----------------------|
+| D-1 | Accepted, applied | `server.error.include-message=always`: sections 3 (Config row), 6, 9, 11 |
+| D-2 | Accepted, applied | Test strategy (MockMvc status + `resolvedException`; `RANDOM_PORT` + `TestRestTemplate` per error case): sections 3 (Tests row), 11, 12 (NFR-4) |
+| D-3 | Accepted, applied | Plain `Long`, no regex/`@Positive`; tests for `/category` -> 400 and `/category/{id}` unaffected: sections 7, 11 |
+| D-4 | Accepted, no architecture change | `ResponseStatusException` stays in the service; accepted tech debt |
+| D-5 | Accepted, no architecture change | Developer confirms Product nullability and uses fully populated fixtures |
+| D-6 | Rejected | No explicit `category` handler; 400 for `/api/products/category` accepted |
