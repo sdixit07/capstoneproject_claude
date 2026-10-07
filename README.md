@@ -66,9 +66,20 @@ The table above shows the various API methods, URL paths, request/response forma
    ```bash
    http://localhost:8080/api/products
 
+### Run locally without Docker (backend)
+```bash
+cd ecom-project
+./mvnw spring-boot:run        # start the API on http://localhost:8080
+./mvnw clean verify           # run unit tests and generate the JaCoCo coverage report
+```
+The coverage report is written to `ecom-project/target/site/jacoco/index.html`.
+
+## Product lookup by id (EPMCDMETST-67217)
+`ProductService.getProductById(Long id)` returns the product with the given id (via `ProductRepository.findById`)
+and throws the unchecked `ProductNotFoundException` (annotated `@ResponseStatus(NOT_FOUND)`, id in the message)
+when none exists. This is a service-layer method only; no `GET /api/products/{id}` endpoint was added.
+
 ---
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-
