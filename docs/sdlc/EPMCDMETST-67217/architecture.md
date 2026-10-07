@@ -86,7 +86,7 @@ Not applicable (no UI change).
 | R2 | No existing service unit tests; Mockito availability. | `spring-boot-starter-test` (JUnit 5, Mockito) is already a test dependency; verify in Step 5. |
 | R3 | Field injection on public `productRepository`. | `@InjectMocks` works; leave as is. |
 | R4 | `@ResponseStatus` only gives a status/reason, not a structured error body. | Acceptable now; a `@RestControllerAdvice` can be added with the controller Story. |
-| R5 | Coverage gate 85% (NFR-4) with small new code. | New code is fully covered by the unit tests; overall coverage checked in Step 7. |
+| R5 | Coverage gate 85% (NFR-4) with small new code. | New code is fully covered by the unit tests. The pom currently has no coverage tool, so per D-1 `jacoco-maven-plugin` (`prepare-agent` + `report` goals) is added to `ecom-project/pom.xml` during implementation (Step 5) so the 85% gate is measurable; overall coverage is checked in Step 7 from the JaCoCo report (`target/site/jacoco`). |
 | R6 | `docs/KNOWN-ISSUES.md` does not exist. | Nothing to reconcile. |
 
 ## 11. Traceability (FR/AC/Sub-task -> Design)
@@ -102,4 +102,11 @@ Not applicable (no UI change).
 | NFR-1 | No schema/API change (sections 1, 7) |
 | NFR-2 | Existing `service` package; new `exception` package (section 3) |
 | NFR-3 | Mocked repository, ids 1L and 999999L (section 6) |
-| NFR-4 | Section 10 R5 |
+| NFR-4 | Section 10 R5; JaCoCo plugin in pom.xml (D-1) makes coverage measurable |
+
+## 12. Changes after design review
+| Decision ID | What changed | Where |
+|---|---|---|
+| D-1 | Add `jacoco-maven-plugin` (`prepare-agent`, `report`) to `ecom-project/pom.xml` during implementation (Step 5); R5 and NFR-4 coverage notes amended so the 85% gate is measured via the JaCoCo report in Step 7. | Section 10 (R5), Section 11 (NFR-4), this section |
+
+Not applied (rejected / not agreed): D-2, D-3, D-4.
