@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,6 +48,29 @@ class ProductServiceTest {
 
         assertTrue(ex.getMessage().contains("999999"));
         assertEquals("Product not found with id: 999999", ex.getMessage());
+    }
+
+    @Test
+    void getAllProducts_returnsRepositoryResult() {
+        List<Product> products = List.of(new Product());
+        when(productRepository.findAll()).thenReturn(products);
+
+        assertEquals(products, productService.getAllProducts());
+    }
+
+    @Test
+    void getProductByCategory_returnsProductsForCategory() {
+        List<Product> products = List.of(new Product(), new Product());
+        when(productRepository.findByCategoryId(5L)).thenReturn(products);
+
+        assertEquals(products, productService.getProductByCategory(5L));
+    }
+
+    @Test
+    void getProductByCategory_emptyForUnknownCategory() {
+        when(productRepository.findByCategoryId(999L)).thenReturn(List.of());
+
+        assertTrue(productService.getProductByCategory(999L).isEmpty());
     }
 
     @Test
