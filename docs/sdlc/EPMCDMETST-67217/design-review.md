@@ -34,5 +34,15 @@ No BLOCKERs. Requirement coverage is complete (see traceability).
 | NFR-1..3 | No API/schema change; package layout; mocked tests | Yes |
 | NFR-4 | R5 | Partial until D-1 |
 
+## Agreed design decisions
+| Decision ID | Outcome | Applied in commit |
+|---|---|---|
+| D-1 | Agreed as proposed | f5af03d (architecture.md) |
+| D-2 | Not agreed; not applied | n/a |
+| D-3 | Not agreed; not applied | n/a |
+| D-4 | Not agreed; not applied | n/a |
+
+Open items: F-3 (D-2), F-4 (D-3) and F-5 (D-4) remain unresolved MINOR findings and are accepted as-is by the user. F-1 (MAJOR) is resolved by D-1.
+
 ## Verdict
-APPROVED WITH CHANGES (pending user agreement on D-1 to D-4).
+APPROVED WITH CHANGES (final). D-1 agreed and applied; D-2 to D-4 not agreed. No BLOCKERs.
