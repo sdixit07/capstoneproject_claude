@@ -273,3 +273,76 @@ either delete `ProductControllerIT`, or add `maven-failsafe-plugin` so `*IT` cla
 **Overall: the story's functionality is fully verified and regression-free; the module-wide 85 %
 coverage gate FAILS at 77.08 % because of pre-existing untouched classes.** Section 3.6 lists exactly
 which members must be covered to clear the gate.
+
+---
+
+## 9. Post-remediation re-verification (addendum)
+
+Sections 1-8 record the **first** verification pass, which failed the 85 % gate at 77.08 %. They are
+left unaltered as the audit trail. After the user approved covering the pre-existing gaps,
+`developer-agent` ran in fix mode (tests only) and this section records the re-verification.
+
+### 9.1 Remediation commits
+
+| Commit | Change |
+|--------|--------|
+| `3c424c2` | `test(EPMCDMETST-67216)`: 14 new tests across 3 new classes |
+| `e6c6fff` | `docs(EPMCDMETST-67216)`: remediation section in `implementation-notes.md` |
+
+New test classes, all matching Surefire's default includes so they actually execute:
+
+| Class | Tests | Covers |
+|-------|------:|--------|
+| `CategoryControllerIntegrationTest` | 5 | `CategoryController.getCategoryService()` (`GET /api/categories`): 200 with data, empty-catalogue `[]`, `products` not serialised, CORS origin, unknown sub-path 404 |
+| `CategoryServiceTest` | 2 | `CategoryService.getAllCategories()`: repository delegation, empty repository |
+| `CategoryAndProductModelTest` | 7 | `Category` all-args + no-args ctor, `setId`/`getProducts`/`setProducts`; `Product` all-args ctor + setters |
+
+No production source, `application.properties`, `pom.xml` or `ecom-front` file was touched by the
+remediation. `ProductControllerIT` is byte-identical.
+
+### 9.2 Re-verification run
+
+Independently re-run by the orchestrator at commit `e6c6fff` (`mvnw.cmd clean test`, BUILD SUCCESS):
+
+```
+CategoryControllerIntegrationTest      5
+ProductByIdErrorBodyIntegrationTest    2
+ProductByIdIntegrationTest             9
+EcomProjectApplicationTests            1
+CategoryAndProductModelTest            7
+CategoryServiceTest                    2
+ProductServiceTest                     3
+Tests run: 29, Failures: 0, Errors: 0, Skipped: 0
+```
+
+29 tests (was 15), 0 failures, 0 errors, 0 skipped, 0 regressions.
+
+### 9.3 Coverage after remediation
+
+Recomputed by the orchestrator from `target/site/jacoco/jacoco.csv` of the run above:
+
+| Counter | First pass | After remediation |
+|---------|-----------|-------------------|
+| **Line** | 77.08 % (74/96) | **97.92 % (94/96)** |
+| Instruction | 82.08 % (261/318) | 98.43 % (313/318) |
+| Method | 79.49 % (31/39) | 97.44 % (38/39) |
+| Branch | n/a (0 probes) | n/a (0 probes) |
+
+Every class is now at 100 % line coverage except `EcomProjectApplication` (1/3). The two
+uncovered lines are `main(String[])`, left deliberately: covering it means booting a second
+Spring context purely for the metric.
+
+### 9.4 Revised verdict
+
+| Check | Result |
+|-------|--------|
+| Full backend suite | **PASS** - 29 tests, 0 failures, 0 errors, 0 skipped |
+| Regressions vs baseline (1 test on `main`) | **PASS** - 0 new failures |
+| AC coverage | **PASS** - 4 / 4 (unchanged; see section 5) |
+| Coverage of touched classes | **PASS** - 100 % |
+| **85 % gate, module-wide line coverage** | **PASS - 97.92 %** (+12.92 pp headroom) |
+| Branch coverage | **n/a** - module has 0 branch probes |
+
+**Overall: Step 7 PASSES.** Defect D-1 from section 7 is closed. D-2 (`ProductControllerIT` never
+executes, 10/13 fail when forced) is out of scope and tracked as **EPMCDMETST-68366**, linked to
+this story. D-3 (stale `surefire-reports/`) remains resolved by `clean test`.
