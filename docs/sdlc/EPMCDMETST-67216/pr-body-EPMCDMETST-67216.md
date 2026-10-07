@@ -92,7 +92,6 @@ BUILD SUCCESS
 | Instruction coverage | 98.43% (313/318) |
 | Branch coverage | **n/a - the module has 0 branch probes** (no production source contains a conditional), so there is no branch percentage to report either way |
 | Coverage of classes touched by this story | 100% (`ProductService`, `ProductController`) |
-| Docs check | 0 errors |
 | Code review verdict | **APPROVE** - 0 blockers, 0 majors, 2 minors |
 
 Per-class line coverage: `ProductService`, `ProductController`, `CategoryService`,
