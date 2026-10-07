@@ -37,3 +37,10 @@
 ## Deviations
 - Overall 85% coverage not reached (pre-existing untested code); reported, not worked around.
 - App-start check skipped (see above).
+
+## Coverage follow-up (tests only, no production change)
+- Added tests: ModelTest (Product/Category getters, setters, constructors), CategoryServiceTest, ProductControllerTest and CategoryControllerTest (standalone MockMvc), DataSeederTest, and getAllProducts/getProductByCategory cases in ProductServiceTest.
+- `mvnw.cmd clean verify`: 20 tests run, 0 failures, 0 errors, 0 skipped. BUILD SUCCESS.
+- JaCoCo overall: instruction 98.4% (311 covered / 5 missed), line 97.9% (95 / 2). Previously 67.4%. Target of 85% met. (No branches exist in the code.)
+- ProductControllerIT remains unexecuted (`*IT` is skipped by Surefire). It was deliberately not enabled: it asserts price-filter and sort behaviour (minPrice/maxPrice) that the current ProductController does not implement, so it would fail. Out of scope for this story.
+- The earlier deviation "85% coverage not reached" is resolved.
