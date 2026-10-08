@@ -83,8 +83,9 @@ report at `ecom-project/target/site/jacoco/`. Do not describe the gate as build-
 
 ## The SDLC pipeline
 
-`orchestrator-agent` coordinates eight stages; each writes one artifact into
-`docs/sdlc/<STORY-ID>/` and commits it before the next stage starts.
+The `/sdlc-run <STORY-ID>` command coordinates eight stages (there is no orchestrator agent); each
+stage writes one artifact into `docs/sdlc/<STORY-ID>/` and commits it before the next stage starts,
+with a user approval after every stage.
 
 | Step | Agent | Artifact |
 |---|---|---|

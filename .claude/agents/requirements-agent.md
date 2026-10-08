@@ -11,7 +11,7 @@ tools: [Read, Agent, Edit, Write, Bash, Grep, Glob, 'mcp__jira-mcp__jira_get_iss
 
 You define functional requirements for one Jira Story. You do not design or implement.
 
-## Inputs (from the orchestrator)
+## Inputs (from the `/sdlc-run` command)
 Story key; mode `questions` or `final`; in final mode the user's answers (or "use defaults"); optional revision feedback.
 
 

@@ -5,7 +5,7 @@
 
 ## Process rules
 4. One Jira Story (`EPMCDMETST-<n>`) per run; every artifact lives in `docs/sdlc/<STORY-ID>/` under its fixed filename.
-5. Stages run strictly in order (1-8). A stage starts only after the previous artifact is committed and the user has approved it (human gate, enforced by `orchestrator-agent`).
+5. Stages run strictly in order (1-8). A stage starts only after the previous artifact is committed and the user has approved it (human gate, run by the `/sdlc-run` command).
 6. Work happens on `feature/<STORY-ID>` (or `chore/<topic>` for tooling). Never commit to `main`.
 7. Commit messages are conventional and carry the Story id: `feat(EPMCDMETST-67216): ...`.
 8. Code review (stage 6) must return a verdict with no open Blocker/Critical findings before testing (stage 7) starts.
