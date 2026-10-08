@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(./mvnw test:*)",
+      "Bash(./mvnw clean test:*)",
+      "Bash(mvnw.cmd test:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm install:*)",
+      "mcp__jira-mcp__jira_get_issue",
+      "mcp__github-mcp__get_pull_request",
+      "mcp__github-mcp__get_file_contents"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Read(./.claude/settings.local.json)",
+      "Read(./.env)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "github-mcp",
+    "jira-mcp"
+  ],
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Capstone SDLC workflow session started\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Capstone SDLC workflow session ended\""
+          }
+        ]
+      }
+    ]
+  }
+}

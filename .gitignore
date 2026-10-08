@@ -1,0 +1,17 @@
+# Secrets / local environment
+.env
+.env.*
+!.env.example
+
+# Claude Code local (machine-specific, may contain tokens)
+.claude/settings.local.json
+.claude/.credentials.json
+
+# CodeMie local
+.codemie/.claude/
+
+# Build output
+target/
+node_modules/
+dist/
+build/
