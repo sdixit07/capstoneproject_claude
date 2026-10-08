@@ -111,6 +111,17 @@ Templates for these documents live in `.claude/templates/`. Agents reference the
 - Keep the artifact filenames in the table above exactly as written — four agents cross-reference
   them by name.
 
+## Rules and guardrails
+
+The full list is in `.claude/pipeline/pipeline-rules.md`; the enforceable part is the
+`permissions` block in `.claude/settings.json`. In short:
+
+- Stages run in order; a stage starts only after the previous artifact is committed.
+- Never merge a PR, force-push, hard-reset, or push to `main` (merge and force-push are denied in settings).
+- `git push`, `git commit`, PR creation and Jira transitions prompt for confirmation.
+- Never weaken or delete tests to pass the coverage gate; report failures as they are.
+- Stay within the approved requirements; scope changes go back to stage 1.
+
 ## Dependencies and secrets
 
 - **`node_modules/` is never committed.** It was purged from history; `.gitignore` covers it.

@@ -20,10 +20,28 @@
       "mcp__github-mcp__get_pull_request",
       "mcp__github-mcp__get_file_contents"
     ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "mcp__github-mcp__create_pull_request",
+      "mcp__jira-mcp__jira_transition_issue"
+    ],
     "deny": [
       "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git push origin main:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git branch -D:*)",
+      "Bash(rm -rf:*)",
       "Read(./.claude/settings.local.json)",
-      "Read(./.env)"
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Edit(./.env)",
+      "Edit(./.claude/settings.local.json)",
+      "mcp__github-mcp__merge_pull_request",
+      "mcp__jira-mcp__jira_delete_issue"
     ]
   },
   "enabledMcpjsonServers": [
