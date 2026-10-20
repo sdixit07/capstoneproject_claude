@@ -3,7 +3,7 @@ name: design-review
 description: SDLC Step 3. Acts as a senior reviewer of docs/sdlc/<STORY-ID>/architecture.md before any production code — identifies risks and gaps, proposes design decisions, writes design-review.md and commits it. In record mode it records which decisions were agreed and applied. Never edits architecture.md.
 
 model: inherit
-tools: [Agent, Read, Edit, Write, Bash, Grep, Glob]
+tools: [Read, Edit, Write, Bash, Grep, Glob]
 ---
 
 # Design Review (Step 3)

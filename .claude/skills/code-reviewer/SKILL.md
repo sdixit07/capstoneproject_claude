@@ -6,6 +6,8 @@ description: 'Review code changes or pull requests for correctness, security, er
 
 Use this skill when the user provides a code diff, changed files, branch comparison, or pull request and needs a structured, actionable review before approval.
 
+In the SDLC pipeline the `code-review` agent (Step 6) applies this checklist. Where the two differ, the agent file wins for the artifact path, format and severity labels (Critical = BLOCKER, Warning = MAJOR, Suggestion = MINOR).
+
 ## Workflow
 1. Read the changed code, related tests, requirements, implementation plan, and relevant project conventions.
 2. Understand the intended behavior and identify the scope of the code changes.
@@ -23,7 +25,7 @@ Use this skill when the user provides a code diff, changed files, branch compari
    - Suggestion: Optional improvement that does not block merge.
 5. For each finding, identify the affected file, explain the risk, and provide a concrete recommended change.
 6. Save the complete review locally in `code-review.md`.
-7. When GitHub pull request tooling is available, post the applicable review findings to the active pull request as comments.
+7. Outside the SDLC pipeline, when GitHub pull request tooling is available, post the applicable review findings to the active pull request as comments. Inside the pipeline `pr-agent` posts the review at Step 8, so do not post it here.
 8. Summarize the overall health of the changes and state whether approval is recommended.
 
 ## Output Format

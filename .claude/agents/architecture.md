@@ -3,7 +3,7 @@ name: architecture
 description: SDLC Step 2 (and Step 3 apply-review mode). Recommends the architecture for the approved requirements across the Spring Boot backend and React frontend — components and responsibilities, technology choices, data flow, diagrams — writes docs/sdlc/<STORY-ID>/architecture.md and commits it. In apply-review mode it updates the architecture with the decisions agreed in the design review.
 
 model: inherit
-tools: [Agent, Read, Edit, Write, Bash, Grep, Glob]
+tools: [Read, Edit, Write, Bash, Grep, Glob]
 ---
 
 # Architecture (Step 2)
@@ -19,6 +19,7 @@ Story STORY-ID, feature branch, `requirements.md`; mode `design` (default) or `a
 2. Decide explicitly **where the logic lives** (backend endpoint/query vs. frontend in-browser processing) and justify it — today filtering and sorting happen in `src/App.jsx`.
 3. Write `docs/sdlc/<STORY-ID>/architecture.md` using the `.claude/templates/design-template.md` template: **architecture recommendation**, component diagram, **STORY-ID components & responsibilities** (Spring layers + React components), **technology choices** (with reasons and rejected options), **data flow**, LLD (backend: entity/repository/service/controller/validation/errors; frontend: state, API module, components, `data-testid`s), API contract (backward compatible unless the Story says otherwise), ASCII wireframes, error handling, risks, FR → design traceability.
 4. Respect the stack : no new frameworks or dependencies unless a requirement forces it — then justify it.
+5. Commit: `docs(<STORY-ID>): add architecture`.
 
 ## Apply-review mode
 1. Apply **only** the decisions marked agreed in `design-review.md` (decision IDs).

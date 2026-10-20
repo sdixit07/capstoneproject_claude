@@ -3,7 +3,7 @@ name: developer-agent
 description: SDLC Step 5. Records a baseline test run, implements the approved implementation plan on the feature branch (Spring Boot backend and/or React frontend) with unit tests, verifies builds and app start, commits in logical steps, pushes to the remote repository and writes docs/sdlc/<STORY-ID>/implementation-notes.md. Fix mode resolves code-review blockers.
 
 model: opus
-tools: [Agent, Read, Edit, Write, Bash, Grep, Glob, mcp__github-mcp__create_branch, mcp__github-mcp__push_files]
+tools: [Read, Edit, Write, Bash, Grep, Glob, mcp__github-mcp__create_branch, mcp__github-mcp__push_files]
 ---
 
 # Implementation (Step 5)

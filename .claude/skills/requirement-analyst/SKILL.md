@@ -6,6 +6,8 @@ description: 'Analyze Jira stories or raw stakeholder requirements, identify amb
 
 Use this skill when the user provides a Jira issue, user story, feature request, stakeholder brief, or raw requirements and needs them analyzed, clarified, and structured before design and implementation.
 
+In the SDLC pipeline the `requirements-agent` (Step 1) applies this analysis. Where the two differ, the agent file wins for the artifact template, the question limit and when files are written.
+
 ## Workflow
 1. Read the supplied Jira story, acceptance criteria, stakeholder request, and any supporting project documentation.
 2. Identify the core business objective, intended users, expected value, and boundaries of the requested change.

@@ -24,6 +24,8 @@
       "Bash(git push:*)",
       "Bash(git commit:*)",
       "mcp__github-mcp__create_pull_request",
+      "mcp__github-mcp__push_files",
+      "mcp__github-mcp__create_or_update_file",
       "mcp__jira-mcp__jira_transition_issue"
     ],
     "deny": [

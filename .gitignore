@@ -19,3 +19,5 @@ build/
 # Local tooling / backups
 .codemie/
 *.bak
+.vscode/
+docs/codemie/
