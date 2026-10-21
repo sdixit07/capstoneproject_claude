@@ -46,6 +46,17 @@ No BLOCKERs. All FR/NFR/AC items are covered by a design element (see Traceabili
 | NFR-4 | No entity change | Yes |
 | AC-1, AC-2, AC-5 | Envelope, defaults, 25 seeded rows | Yes |
 
+## Agreed design decisions
+
+| Decision ID | Agreed as | Applied in |
+|---|---|---|
+| D-1 | Agreed with a choice: an overflowing `page * size` (> `Integer.MAX_VALUE`) returns 200 with an empty envelope (not 400) | commit 1688b94 |
+| D-2 | Agreed as proposed | commit 1688b94 |
+| D-3 | Agreed as proposed | commit 1688b94 |
+| D-4 | Agreed as proposed | no architecture change |
+| D-5 | Agreed as proposed | no architecture change |
+| D-6 | Agreed as proposed | no architecture change |
+
 ## Verdict
 
-**APPROVED WITH CHANGES** - no BLOCKERs; apply D-1, D-2, D-3 to `architecture.md` (one MAJOR, two MINOR) before planning.
+**APPROVED WITH CHANGES** - no BLOCKERs. The changes (D-1, D-2, D-3) have been applied to `architecture.md` in commit 1688b94; the design is ready for planning.
