@@ -34,8 +34,9 @@ Measured on `chore/align-capstone-structure` (2026-10-21): backend `./mvnw test`
 ## KI-4: e2e failures in `catalog-search-pagination.spec.js`
 
 - **Where:** `ecom-front/ecom-catalog-react/tests/catalog-search-pagination.spec.js`
-- **Symptom:** 4 failures reported by the Step 7 test report for this e2e spec.
-- **Cause (inferred from code inspection, not measured at baseline; e2e was not run at baseline):** the spec expects Prev/Next buttons and a sort/paginate flow that `src/App.jsx` does not implement.
+- **Symptom:** 3 tests fail in this e2e spec ("loads initial products and shows pagination controls", "can search by keyword and resets to page 1 behavior", "can paginate to next page and updates the list"). The sort test is flaky (pass, skipped or fail between runs) and is not counted.
+- **Verified:** the same 3 tests fail on old `main` (091708d) with the same front end, so they pre-date EPMCDMETST-69858.
+- **Cause:** the spec expects Prev/Next buttons and a sort/paginate flow that `src/App.jsx` does not implement.
 - **Likely fix (outside any Story):** a front-end Story implementing that UI, or retiring the spec.
 
 ## KI-3: ESLint errors
