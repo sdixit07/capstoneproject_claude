@@ -62,3 +62,15 @@ Full backend suite: 25 run, 0 failures, 0 errors, 0 skipped (baseline 1 run, 0 f
 ## Fix-mode section
 
 Not applicable (normal mode).
+
+## Fix mode (Step 7 findings D-2, KI-4)
+
+- D-2: vitest collected the Playwright spec `tests/EPMCDMETST-69858.spec.js` (same mechanism as KI-1). Fix: `ecom-front/ecom-catalog-react/vite.config.js` now imports `defineConfig`/`configDefaults` from `vitest/config` and sets `test.exclude: [...configDefaults.exclude, 'tests/**']`. Chosen over moving files because `playwright.config.js` has `testDir: './tests'`.
+- Results (measured):
+  - `npm test`: 1 failed file (`src/api/productsApi.test.js`, KI-2), 0 tests run. Baseline was 2 failed files; the Step 7 state was 3. So it is now one better than baseline: the KI-1 failure is gone as well as D-2. KI-2 remains.
+  - `npm run lint`: 6 errors, identical to baseline (KI-3), no new ones.
+  - `npm run build`: success.
+  - `npx playwright test --list`: 14 tests in 2 files, so e2e discovery is intact. e2e was not executed.
+- `.gitignore` in `ecom-catalog-react` now ignores `test-results/` (folder not deleted).
+- `docs/KNOWN-ISSUES.md`: KI-1 marked resolved with the evidence above; KI-4 recorded as inferred from code inspection, not measured at baseline.
+- Not touched: `src/App.jsx`, `productsApi.test.js`, `ProductControllerIT.java`, `pom.xml`, backend code.

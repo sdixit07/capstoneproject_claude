@@ -15,7 +15,9 @@ Measured on `chore/align-capstone-structure` (2026-10-21): backend `./mvnw test`
 | Front end `npm test` (vitest) | 2 failed suites, 0 tests run (KI-1, KI-2) |
 | Front end `npm run lint` | 6 errors, 0 warnings (KI-3) |
 
-## KI-1: vitest collects a Playwright spec
+## KI-1: vitest collects a Playwright spec (RESOLVED by EPMCDMETST-69858)
+
+- **Resolution:** `vite.config.js` now sets vitest `test.exclude` to the vitest defaults plus `tests/**`. Measured after the change: `npm test` reports 1 failed file (`src/api/productsApi.test.js`, KI-2) instead of 2 at baseline; `npx playwright test --list` still lists 14 tests in 2 files, so `npm run test:e2e` discovery is unaffected. The e2e specs themselves were not executed in this fix.
 
 - **Where:** `ecom-front/ecom-catalog-react/tests/catalog-search-pagination.spec.js`
 - **Symptom:** `npm test` fails the suite with "Playwright Test did not expect test.describe() to be called here."
@@ -28,6 +30,13 @@ Measured on `chore/align-capstone-structure` (2026-10-21): backend `./mvnw test`
 - **Symptom:** `npm test` fails with "Failed to load url ./productsApi. Does the file exist?"
 - **Cause:** `src/api/` contains only the test file; there is no `productsApi.js`. The test also uses `vi` without importing it (see KI-3).
 - **Likely fix:** a Story that adds the API module, or removing the orphan test.
+
+## KI-4: e2e failures in `catalog-search-pagination.spec.js`
+
+- **Where:** `ecom-front/ecom-catalog-react/tests/catalog-search-pagination.spec.js`
+- **Symptom:** 4 failures reported by the Step 7 test report for this e2e spec.
+- **Cause (inferred from code inspection, not measured at baseline; e2e was not run at baseline):** the spec expects Prev/Next buttons and a sort/paginate flow that `src/App.jsx` does not implement.
+- **Likely fix (outside any Story):** a front-end Story implementing that UI, or retiring the spec.
 
 ## KI-3: ESLint errors
 
