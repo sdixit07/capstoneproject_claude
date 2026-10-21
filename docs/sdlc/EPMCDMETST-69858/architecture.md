@@ -46,7 +46,7 @@ Approach: keep the existing layers (Controller -> Service -> Repository). The co
 | Layer | Component | Change | Responsibility |
 |---|---|---|---|
 | Controller | `controller/ProductController` | modify | `getAllProducts` takes `@RequestParam(defaultValue="0") int page`, `@RequestParam(defaultValue="10") int size`; validates ranges; returns `PagedResponse<Product>`. `getProductByCategory` unchanged (FR-11). |
-| Service | `service/ProductService` | modify | Add `Page<Product> getProducts(Pageable)` -> `productRepository.findAll(pageable)`. Existing `getAllProducts()` may stay. |
+| Service | `service/ProductService` | modify | Add `Page<Product> getProducts(Pageable)` -> `productRepository.findAll(pageable)` and `long countProducts()` -> `productRepository.count()` (D-1 guard). Existing `getAllProducts()` stays unchanged (D-5). |
 | Repository | `repository/ProductRepository` | none | Inherited `findAll(Pageable)` is sufficient. |
 | DTO | `dto/PagedResponse<T>` (new package `org.ecom.productcatalog.dto`) | new | Immutable envelope with `items`, `page`, `size`, `totalItems`, `totalPages`. A Java `record` (Java 21) with static factory `from(Page<T>)`. |
 | Config | `config/DataSeeder` | modify | Seed >= 25 products across Electronics, Clothing, Home and Kitchen (FR-10). Keep the existing 4 products; add 21+ more. |
@@ -61,7 +61,7 @@ Approach: keep the existing layers (Controller -> Service -> Repository). The co
 | Paging mechanism | Spring Data `Pageable` + `findAll(Pageable)` | Required by FR-4; DB-level `LIMIT/OFFSET` + `COUNT` (NFR-1) | Slicing `findAll()` in memory (violates NFR-1) |
 | Response shape | Custom `PagedResponse` record | Exact contract of FR-3; avoids `PageImpl` JSON (`content`, `number`, `pageable`, ...) and its unstable-serialization warning | Returning `Page<Product>` directly; `PagedModel` (needs HATEOAS dependency) |
 | Param binding | `@RequestParam int` with `defaultValue` | Non-numeric input raises `MethodArgumentTypeMismatchException`, which Spring Boot maps to 400 (FR-8). Missing params get defaults (FR-2) | `Pageable` argument resolver / `@PageableDefault`: clamps oversized values and falls back on bad input instead of returning 400, so it cannot meet FR-6/7/8 |
-| Range validation | Explicit checks in controller throwing `ResponseStatusException(BAD_REQUEST, msg)` | No new dependency (`spring-boot-starter-validation` is absent from `pom.xml`); `message` shows under existing `server.error.include-message=always` (NFR-2) | Bean Validation starter (new dependency, not forced); `@ControllerAdvice` (extra surface for three checks) |
+| Range validation | Explicit checks in controller throwing `ResponseStatusException(BAD_REQUEST, msg)` | No new dependency (`spring-boot-starter-validation` is absent from `pom.xml`); `message` appears only if `server.error.include-message=always` is set; it is NOT currently in `application.properties` despite CLAUDE.md (D-2), so tests assert status only (NFR-2) | Bean Validation starter (new dependency, not forced); `@ControllerAdvice` (extra surface for three checks) |
 | Sorting | `Sort.by(ASC, "id")` fixed in controller | FR-5; client cannot override, paging is deterministic | Client-supplied `sort` param (out of scope) |
 
 No new dependencies or frameworks.
@@ -118,19 +118,28 @@ public PagedResponse<Product> getAllProducts(
     return PagedResponse.from(productService.getProducts(pageable));
 }
 ```
-Edge: `PageRequest` computes offset as `long`, so a huge `int` page (e.g. `Integer.MAX_VALUE`) returns an empty page rather than overflowing. A value beyond int range (e.g. `page=99999999999`) fails binding and returns 400, which satisfies FR-8.
+Edge (revised, D-1): `PageRequest` holds a `long` offset, but Spring Data JPA 3.4 `findAll(Pageable)` converts it to `int` for `setFirstResult` and throws `InvalidDataAccessApiUsageException` when it exceeds `Integer.MAX_VALUE`. So the controller guards before querying: if `(long) page * size > Integer.MAX_VALUE`, it skips the paged query and returns **200 with an empty envelope** (`items: []`, requested `page`/`size` echoed, real `totalItems`/`totalPages`), consistent with FR-9. Totals come from `productService.countProducts()` (new, `productRepository.count()`), with `totalPages = ceil(totalItems / size)`. A value beyond int range (e.g. `page=99999999999`) fails binding and returns 400 (FR-8).
+```java
+if ((long) page * size > Integer.MAX_VALUE) {
+    long total = productService.countProducts();
+    int totalPages = (int) ((total + size - 1) / size);
+    return new PagedResponse<>(List.of(), page, size, total, totalPages);
+}
+```
+This guard goes after the range checks and before `PageRequest` is built. A test is required (MockMvc, e.g. `page=2147483647&size=10` -> 200, empty `items`, `totalItems` equal to the row count, `page` echoed).
 
 **Validation and errors**
 
 | Input | Result |
 |---|---|
 | omitted page/size | 200, page 0, size 10 |
-| `page<0`, `size<1`, `size>100` | 400, `message` states the rule |
+| `page<0`, `size<1`, `size>100` | 400 (exception message states the rule; appears in body only if `include-message` is enabled, see D-2) |
+| `(long) page * size > Integer.MAX_VALUE` | 200, `items: []`, requested page/size echoed, real totals (D-1) |
 | `page=abc` / `size=abc` | 400 (type mismatch, Spring default) |
 | `page` past last | 200, `items: []`, correct totals |
 | empty table | 200, `items: []`, `totalItems 0`, `totalPages 0` |
 
-Error body is Spring Boot's standard JSON (`timestamp, status, error, message, path`); `message` appears only under the local-dev setting (NFR-2).
+Error body is Spring Boot's standard JSON (`timestamp, status, error, path`, plus `message` only if `server.error.include-message` is enabled). The committed `application.properties` does not set it, contrary to CLAUDE.md. This Story does not add it; tests assert HTTP status only, never `message` (D-2, NFR-2).
 
 **DataSeeder**: add a small private helper (name, description, price, category) and `saveAll` 25 or more products. Suggested split: 9 Electronics, 8 Clothing, 8 Home and Kitchen = 25, keeping the original 4 as the first rows. IDENTITY ids ascend in insertion order. The initial `deleteAll()` calls stay.
 
@@ -164,7 +173,7 @@ GET /api/products?size=101   -> 400
 ## 9. Error Handling Summary
 - Validation failures use `ResponseStatusException(400)`; type-binding failures use Spring's default 400.
 - No new exception types and no global advice.
-- No 404/500 paths are introduced.
+- No 404 paths are introduced. No 500 path for large `page` values: the controller guard in 6.1 returns an empty 200 envelope when `(long) page * size > Integer.MAX_VALUE`, avoiding the Spring Data offset-overflow exception (D-1).
 
 ## 10. Risks
 
@@ -172,7 +181,7 @@ GET /api/products?size=101   -> 400
 |---|---|---|
 | R1 | Front end (`App.jsx`) breaks against the envelope | Accepted and documented (requirements Known Limitations); follow-up Story |
 | R2 | Existing `src/test/.../controller/ProductControllerIT.java` asserts a bare array (`hasSize(27)`) and uses `search`, `sort`, `minPrice`, `maxPrice`, `categoryId` params that the current controller does not implement. It is not part of the baseline run (1 test; surefire does not match `*IT`) and mostly fails against current code already. | Do not weaken it. Add pagination tests in a separate class named so surefire runs it (e.g. `ProductPaginationTest`). Tester should report the stale IT as a pre-existing discrepancy, not a defect of this Story. |
-| R3 | Tests calling `deleteAll()` in a shared `@SpringBootTest` context contaminate `DataSeeder` data | New tests create their own data in `@BeforeEach` and assert on it, not on seed counts. AC-10 verified with a dedicated check of the seeded state (e.g. invoking `DataSeeder.run` then counting, or `@DirtiesContext`). |
+| R3 | Tests calling `deleteAll()` in a shared `@SpringBootTest` context contaminate `DataSeeder` data | New tests create their own data in `@BeforeEach` and assert on it, not on seed counts; data-mutating test classes use `@DirtiesContext` (or recreate data in `@BeforeEach`). AC-10 is verified by one dedicated test that calls `dataSeeder.run()` and asserts `count() >= 25` and that all 3 categories have products (D-3). |
 | R4 | Eager `@ManyToOne` category may cause extra selects for up to 100 rows | Acceptable at this scale (3 categories, session cache). Revisit if catalog grows |
 | R5 | `CLAUDE.md` lists `GET /api/products/{id}`, which does not exist | Out of scope per instruction; not addressed. `CLAUDE.md` should later document the envelope |
 | R6 | Offset paging slows on very deep pages | Not relevant at this scale; keyset paging is a future option |
@@ -189,7 +198,7 @@ GET /api/products?size=101   -> 400
 | FR-6 | explicit `page<0`, `size<1` checks -> 400 |
 | FR-7 | `size>100` check -> 400 |
 | FR-8 | `int` binding, Spring type-mismatch 400 |
-| FR-9 | Spring Data empty page with real totals |
+| FR-9 | Spring Data empty page with real totals; overflow guard returns empty envelope (D-1) |
 | FR-10 | `DataSeeder` extended to 25 products / 3 categories |
 | FR-11 | category method untouched |
 | NFR-1 | DB `LIMIT/OFFSET` + `COUNT` via Pageable |
@@ -200,3 +209,16 @@ GET /api/products?size=101   -> 400
 | AC-3, AC-4, AC-6, AC-8 | validation matrix in 6.1 |
 | AC-7 | past-the-end row in 6.1 |
 | AC-10 | `DataSeeder` change |
+
+## 12. Changes after design review
+
+All six decisions in `design-review.md` (D-1..D-6) were accepted by the user.
+
+| Decision | What changed | Where |
+|---|---|---|
+| D-1 | Removed the incorrect claim that a huge `page` safely yields an empty page. Added controller guard: `(long) page * size > Integer.MAX_VALUE` returns 200 with an empty envelope (empty `items`, real `totalItems`/`totalPages`, requested `page`/`size` echoed), consistent with FR-9. Added `ProductService.countProducts()`. A MockMvc test is required (`page=2147483647&size=10`). | 3 (Service row), 6.1 (Edge paragraph, validation table), 9, 11 (FR-9) |
+| D-2 | Documented that `server.error.include-message` is not set in `application.properties` (CLAUDE.md is inaccurate); property not added in this Story; tests assert status only. | 4 (range validation row), 6.1 (validation table, error body note) |
+| D-3 | Specified AC-10 verification: one dedicated test calls `dataSeeder.run()` and asserts `count() >= 25` and 3 categories with products; data-mutating test classes use `@DirtiesContext` or recreate data in `@BeforeEach`. | 10 (R3) |
+| D-4 | Agreed; no architecture change. Tests for AC-9 assert strictly ascending ids within and across pages, no duplicates or gaps. | planner/tester guidance |
+| D-5 | Agreed; no architecture change beyond stating `getAllProducts()` is retained unchanged (clarifying note only). | 3 (Service row) |
+| D-6 | Agreed; no architecture change. CLAUDE.md untouched; gap listed under PR "Known Limitations". | n/a (R5 unchanged) |
