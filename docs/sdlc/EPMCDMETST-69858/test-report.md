@@ -4,7 +4,7 @@
 
 | Item | Value |
 |---|---|
-| Commit SHA | 1913651 (HEAD under test; the verification commit follows it, see git log) |
+| Commit SHA | 972427d (HEAD under test; first run was at 1913651/ab1f30b; re-run commit follows, see git log) |
 | Branch | `feature/EPMCDMETST-69858` |
 | Java / Maven | OpenJDK 21.0.5 / Maven wrapper (`mvnw.cmd`) |
 | Node / npm | Node v24.19.0 |
@@ -17,11 +17,17 @@
 | Story backend tests (new `ProductPaginationSeededIntegrationTest`) | `.\mvnw.cmd test -Dtest=ProductPaginationSeededIntegrationTest` | 4 | 0 | 0 |
 | Backend full | `.\mvnw.cmd clean test` | 29 | 0 | 0 |
 | Story API-level Playwright | `npx playwright test tests/EPMCDMETST-69858.spec.js` (backend running) | 10 | 0 | 0 |
-| Front-end unit | `npm test` | 0 (no tests ran) | 3 files failed | 0 |
+| Front-end unit | `npm test` | 0 (no tests ran) | 1 file failed (`productsApi.test.js`, KI-2) | 0 |
 | Front-end lint | `npm run lint` | - | 6 errors | - |
-| Front-end e2e (full) | `npm run test:e2e` (backend running) | 10 | 4 | 0 |
+| Front-end e2e (full) | `npm run test:e2e` (backend running) | 10 | 3 | 1 |
 
 Backend breakdown (29): DataSeederTest 2, ProductPaginationSeededIntegrationTest 4 (new in Step 7), ProductPaginationTest 16, PagedResponseTest 2, EcomProjectApplicationTests 1, ProductServiceTest 4. `ProductControllerIT` is not run by Surefire (`*IT`; known stale, see implementation-notes R2).
+
+### 2.1 Changes since the first run (ab1f30b)
+
+- `npm test`: 3 failed files -> 1 failed file. ec3cf14 excludes `tests/**` from vitest (D-2 closed; KI-1 resolved). This is better than the baseline of 2 failed files.
+- e2e: 4 failed -> 3 failed, 1 skipped (the `catalog-search-pagination.spec.js` sort test; its outcome varies between runs, see section 4).
+- Backend (29 pass) and lint (6 errors, all KI-3) unchanged. Story API spec still 10/10 (included in the 10 passing e2e).
 
 ## 3. Coverage
 
@@ -48,11 +54,15 @@ Not determinable without a coverage report.
 | | Baseline | Now | New failures |
 |---|---|---|---|
 | Backend | 1 test passing | 29 passing, 0 failing | 0 |
-| Front end unit | 2 failed files (KI-1, KI-2) | 3 failed files | 1 file: the new `tests/EPMCDMETST-69858.spec.js`, same mechanism as KI-1 (vitest collects Playwright specs in `tests/`). Test-infrastructure artifact, not an application defect; the fix (exclude `tests/` from vitest) is front-end config, out of scope |
-| Front end lint | 6 errors (KI-3) | 6 errors | 0 (the new spec's own `process` error was removed) |
-| E2E | not run at baseline | 10 pass (story API spec), 4 fail in `catalog-search-pagination.spec.js` | see below |
+| Front end unit | 2 failed files (KI-1, KI-2) | 1 failed file (KI-2 only) | 0. Better than baseline (KI-1 resolved by ec3cf14) |
+| Front end lint | 6 errors (KI-3) | 6 errors (identical files and lines) | 0 |
+| E2E | not run at baseline | 10 pass (Story API spec), 3 fail + 1 skipped in `catalog-search-pagination.spec.js` | none attributable to this Story (see below) |
 
-E2E failures: all 4 are in the existing UI spec `tests/catalog-search-pagination.spec.js`. It expects Prev/Next buttons and a sort/paginate flow that `src/App.jsx` does not implement (no Prev/Next anywhere in `src/`), and the spec predates this Story (commit 091708d). They are pre-existing and not caused by this Story's backend change; proposed as **KI-4**. A baseline e2e run was never recorded, so this classification rests on code inspection, not a baseline run. Separately, the known limitation applies: `App.jsx` expects a bare array and will break against the envelope (follow-up front-end Story needed).
+E2E failures (KI-4): the 3 failing tests are "loads initial products and shows pagination controls", "can search by keyword and resets to page 1 behavior" and "can paginate to next page and updates the list". The spec is from commit 091708d and `src/App.jsx` is unchanged by this Story (`git diff main -- ecom-front` touches only `.gitignore`, `vite.config.js` and the new spec).
+
+**Verified, not merely inferred:** I created a temporary worktree of `main` (091708d), started its backend (bare-array `/api/products`), and ran the same spec with the same front end. Result on main: the same 3 tests fail and 1 passes (the sort test). On this branch: the same 3 fail and the sort test was skipped in the full run (4 failed in the first run). So the 3 failures reproduce without this Story's backend change and are pre-existing (KI-4). The worktree was removed afterwards. Caveats: the sort test's result differs between runs and between branches (pass / skip / fail), so its outcome is flaky and I do not attribute it either way; the e2e suite was only run once on each side for this spec.
+
+Separately, the known limitation L-1 stands: `App.jsx` expects a bare array and will render nothing against the envelope. This does not change which tests fail today, because the cards/Prev/Next controls these tests need do not exist on main either.
 
 ## 5. Acceptance criterion verification
 
@@ -90,11 +100,23 @@ AC coverage: 10/10. Edge scenarios (negative size, offset overflow, empty table,
 
 | Id | Severity | Description | Status |
 |---|---|---|---|
-| D-1 | High (gate) | Coverage unmeasurable: no JaCoCo plugin in `pom.xml`; the 85% gate cannot be shown as met | Open, by user decision |
-| D-2 | Low | New Playwright spec is collected by vitest (KI-1 mechanism), so `npm test` shows 3 failed files instead of 2 | Open; needs vitest `exclude: tests/**` (out of scope) |
-| KI-4 | Medium | `catalog-search-pagination.spec.js` (4 tests) fails: UI lacks Prev/Next and related controls. Pre-existing | Known issue, carry to PR |
+| D-1 | High (gate) | Coverage unmeasurable: no JaCoCo plugin in `pom.xml`; the 85% gate cannot be shown as met | Open; exception decided by the user (not adding JaCoCo). Not a waiver of the gate: it stays unmeasured |
+| D-2 | Low | New Playwright spec collected by vitest (`npm test` 3 failed files vs 2) | Closed: fixed in ec3cf14, `npm test` now 1 failed file (KI-2), better than baseline |
+| KI-4 | Medium | `catalog-search-pagination.spec.js`: 3 tests fail (UI lacks Prev/Next etc.); reproduced on `main`. Recorded in docs/KNOWN-ISSUES.md | Known issue, carry to PR |
 | L-1 | Known limitation | `App.jsx` expects a bare array and will break against the envelope | Follow-up front-end Story |
 
 ## 8. Verdict
 
-**FAIL (gate not demonstrable).** Functionally: zero new application failures versus baseline, 10/10 ACs verified, zero document errors. The 85% coverage gate is UNMEASURED and cannot be shown as met, so a PASS cannot be issued. If the user records the missing coverage measurement as an accepted waiver, the functional result is clean.
+**Not PASS: gates are not all met.**
+
+| Gate | Status |
+|---|---|
+| Story backend tests (4) and Story API spec (10) | Met |
+| Backend full suite (29/29), no new failures | Met |
+| `npm test` at or better than baseline (2 failed files) | Met (1 failed file, KI-2) |
+| `npm run lint` no more than 6 baseline errors | Met (6, all KI-3) |
+| E2E: no new failures | Met (3 failures reproduced on `main`, KI-4) |
+| AC coverage 10/10, documents complete | Met |
+| Coverage >= 85% | UNMEASURED. Cannot be shown as met. Exception decided by the user (JaCoCo not added); no number is given |
+
+Overall: functionally clean versus baseline, but the 85% gate is unmeasured, so a PASS is not issued. It is an open exception owned by the user.
