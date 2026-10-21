@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(./mvnw test:*)",
+      "Bash(./mvnw clean test:*)",
+      "Bash(mvnw.cmd test:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm install:*)",
+      "mcp__jira-mcp__jira_get_issue",
+      "mcp__github-mcp__get_pull_request",
+      "mcp__github-mcp__get_file_contents"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "mcp__github-mcp__create_pull_request",
+      "mcp__github-mcp__push_files",
+      "mcp__github-mcp__create_or_update_file",
+      "mcp__jira-mcp__jira_transition_issue"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git push origin main:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git branch -D:*)",
+      "Bash(rm -rf:*)",
+      "Read(./.claude/settings.local.json)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Edit(./.env)",
+      "Edit(./.claude/settings.local.json)",
+      "mcp__github-mcp__merge_pull_request",
+      "mcp__jira-mcp__jira_delete_issue"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "github-mcp",
+    "jira-mcp"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-main-commit.js\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Capstone SDLC workflow session started\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Capstone SDLC workflow session ended\""
+          }
+        ]
+      }
+    ]
+  }
+}
