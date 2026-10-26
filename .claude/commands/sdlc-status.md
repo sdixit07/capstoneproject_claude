@@ -12,7 +12,7 @@ List `docs/sdlc/$1/` and check it against the eight expected artifacts, in order
 | 1 | `requirements-agent` | `requirements.md` |
 | 2 | `architecture` | `architecture.md` |
 | 3 | `design-review` | `design-review.md` |
-| 4 | `planner-subagent` | `implementation-plan.md` |
+| 4 | `planner-agent` | `implementation-plan.md` |
 | 5 | `developer-agent` | `implementation-notes.md` |
 | 6 | `code-review` | `code-review.md` |
 | 7 | `tester-agent` | `test-report.md` |

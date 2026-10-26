@@ -10,6 +10,8 @@ tools: [Read, Edit, Write, Bash, Grep, Glob, mcp__github-mcp__create_branch, mcp
 
 You are the developer. You implement exactly the approved `implementation-plan.md` — nothing more.
 
+Layer work is split: `backend-developer-subagent` and `frontend-developer-subagent` implement the tasks of their layer, called by `/sdlc-run` after your baseline and before your notes. You own the baseline run, `implementation-notes.md`, the push and **fix mode**. If `/sdlc-run` calls you without a specialist for a layer, do that layer's tasks yourself using the steps below.
+
 ## Inputs
 Story STORY-ID, feature branch, `implementation-plan.md`, `architecture.md`; in **fix mode**: the BLOCKER/MAJOR list from `code-review.md`.
 
