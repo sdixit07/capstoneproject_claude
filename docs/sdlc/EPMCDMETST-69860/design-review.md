@@ -1,7 +1,7 @@
 # Design Review: EPMCDMETST-69860 - Prev/Next catalog pagination
 
 - **Reviewed**: `architecture.md` (commit 287dd8a) against `requirements.md`, plus `App.jsx`, `package.json`, `vite.config.js`, `tests/catalog-search-pagination.spec.js`, `src/api/productsApi.test.js`, and the backend `ProductController` (still unpaged).
-- **Mode**: review
+- **Mode**: review; updated in record mode (see Agreed design decisions)
 
 ## Findings
 
@@ -46,6 +46,28 @@
 | AC-1..AC-3 | Section 12 | OK; test strategy via D-3 |
 | OQ-1 | Section 10 | Awaiting user ruling (D-4) |
 
+## Agreed design decisions
+
+The user accepted all of D-1..D-8 as proposed and ruled OQ-1 = Option A (no reset on filter/sort change, with the D-4 hint). The architecture agent applied them in commit `658b53b` (`architecture.md` section 13). Verified against this review's recommendations.
+
+| Decision | Agreed | Applied in commit | Verification |
+|----------|--------|-------------------|--------------|
+| D-1 | agreed as proposed | 658b53b | Applied (section 1 gate, R1). Gate is documented only; it is not yet executed. |
+| D-2 | agreed as proposed | 658b53b | Applied (`loadedPage`, `retryToken`, rollback, Retry, `catalog-retry`; sections 6.2, 8, 9). See note N-1. |
+| D-3 | agreed as proposed | 658b53b | Applied (sections 4, 6.2, R3, R4; `paginationState.js` helpers, no new dependencies). |
+| D-4 | agreed as proposed (OQ-1 = Option A) | 658b53b | Applied (section 10 resolved, hint with `catalog-limited-hint`, handlers do not reset page). |
+| D-5 | agreed as proposed | 658b53b | Applied (buttons rendered but disabled, label hidden, `catalog-empty`; deviation from FR-6 recorded in section 12). |
+| D-6 | agreed as proposed | 658b53b | Applied (`disabled={loading}`, list replaced by loading indicator, `aria-busy`, cancel flag kept). |
+| D-7 | agreed as proposed | 658b53b | Applied (`productsApi.test.js` untouched; `productsApi.paging.test.js`; KI-2 attribution). |
+| D-8 | agreed as proposed | 658b53b | Applied (`Array.isArray(items)`, `BASE_URL`, fixed error text with `e.message` logged, page clamp). |
+
+### Residual notes (not blocking; for developer and tester)
+
+- **N-1 (D-2, MINOR, partly applied)**: In the section 6.2 effect, the catch branch calls `setPage(loadedPage)`. When a Next/Prev request fails, this changes `page` and re-runs the effect, which calls `setError(null)` and refetches the loaded page. The error message and Retry button can therefore be cleared at once, or flash, instead of persisting, which contradicts section 9 ("Retry re-requests"). The initial-failure path is unaffected (`page` stays 0). The section 6.2 text lets the developer restructure the effect provided the D-2 behaviour holds. Developer must ensure the error stays visible after rollback (for example, do not clear `error` on a rollback-triggered run, or track the requested page separately from the fetched page), and the tester should cover "Next fails: error and Retry visible, label still shows the previous page".
+- **N-2 (MINOR)**: `retryToken` and its setter are described in prose but missing from the section 6.2 state table. The effect also reads `loadedPage` without listing it in the dependency array, which the lint `react-hooks/exhaustive-deps` rule may flag. Do not add new lint errors beyond the 6 baseline ones (NFR-4).
+
 ## Verdict
 
-**CHANGES REQUIRED** (one BLOCKER: F-1, the unverified paged-backend prerequisite; plus 3 MAJOR). The design is otherwise sound and small. Accepting D-1..D-8 and recording them in an architecture update would move it to APPROVED WITH CHANGES; F-1 clears only when the sibling endpoint is confirmed available.
+**APPROVED WITH CHANGES.** All MAJOR findings (F-2, F-3, F-4) and the MINOR findings (F-5..F-9) are resolved in the design by D-2..D-8 as applied in `658b53b`, subject to notes N-1 and N-2.
+
+**F-1 stays OPEN (BLOCKER on execution, not on design).** The design now carries the D-1 gate, but the backend in this repository is still unpaged. F-1 clears only when the sibling paged-endpoint Story is confirmed available by running the D-1 gate (`curl "http://localhost:8080/api/products?page=0&size=12"` returns `{items,page,size,totalItems,totalPages}`). If the gate fails, development stops and a blocker is reported; no front-end fallback is added.
