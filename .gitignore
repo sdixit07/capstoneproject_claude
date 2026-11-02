@@ -21,3 +21,6 @@ build/
 *.bak
 .vscode/
 docs/codemie/
+
+# Playwright output
+test-results/

@@ -18,7 +18,7 @@
 - **Destructive git**: no force-push, no `reset --hard` on shared branches, no history rewrites, no deleting remote branches.
 - **Dependencies**: `node_modules/` and `target/` are never committed. New dependencies must be justified in `implementation-notes.md` and checked by `code-review` (`npm audit`, Maven dependency review).
 - **Jira**: agents may read the Story, add comments and link the PR. They do not delete issues, change other Stories, or transition a Story without the user's say-so.
-- **GitHub**: agents may create branches, push feature branches and open PRs. They never merge, approve their own PR, or push to `main`.
+- **GitHub**: agents may create branches, push feature branches and open PRs. They never merge, approve their own PR, or push to `main` or `master`.
 - **Read-only stages**: `code-review` and `design-review` never modify production code or `architecture.md`.
 - **Local-only config**: `server.error.include-message=always` is a development setting; do not carry it into production profiles.
 - **Honest reporting**: failing tests, skipped steps and coverage gaps are reported as they are in the artifact. Do not weaken or delete tests to pass a gate.
