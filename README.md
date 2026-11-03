@@ -9,6 +9,7 @@ This is a simple E-commerce application built with **Spring Boot**. The project 
 - **Back-End Database**: A robust database to manage product inventory and categories.
 - **RESTful API**: A Spring Boot-based API to interact with the front-end and handle business logic.
 - **Paginated product list**: `GET /api/products` returns a page of products in a paged envelope.
+- **Prev/Next catalog navigation**: the React catalog shows one page at a time with Previous/Next buttons and a page label.
 
 ---
 
@@ -27,7 +28,7 @@ Invalid or non-numeric values return `400`. A page past the end returns an empty
 curl "http://localhost:8080/api/products?page=0&size=10"
 ```
 
-The response is a paged envelope rather than a bare array. Note that the current React front end (`App.jsx`) still expects a bare array and needs a follow-up change to consume the envelope.
+The response is a paged envelope rather than a bare array. The React front end consumes the envelope and shows Previous/Next buttons (Previous is disabled on the first page, Next on the last; both are disabled while a page loads). A failed page load keeps the previously loaded page visible and shows a Retry button. Category filter and sort apply to the currently loaded page only.
 
 ---
 
@@ -95,7 +96,8 @@ No Docker is needed. Java 21 and Node 18+ are required.
    cd ../ecom-front/ecom-catalog-react
    npm install
    npm test                    # front-end unit tests
-   npm run dev                 # front-end dev server
+   npm run dev                 # front-end dev server (http://localhost:5173, needs the backend on :8080)
+   npm run test:e2e            # Playwright e2e (see playwright.config.js)
    ```
 
 ---
