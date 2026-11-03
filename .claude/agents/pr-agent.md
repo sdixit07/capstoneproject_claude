@@ -19,7 +19,7 @@ Story STORY-ID, feature branch, all artifacts in `docs/sdlc/<STORY-ID>/`.
 1. **Documentation:** update the root `README.md` (feature description/usage, local run commands without Docker; keep the rest accurate). Add the **CHANGELOG entry** in `CHANGELOG.md` (create if missing; Keep a Changelog style) under `## [Unreleased]` → Added/Changed/Fixed, each ending with `(<STORY-ID>)`. Commit `docs(<STORY-ID>): update README and CHANGELOG`.
 2. Push to the feature branch using mcp__github-mcp__push_files
 3. Write the PR body to `docs/sdlc/<STORY-ID>/pr-body-<STORY-ID>.md` — all five sections, **Test Evidence** containing the test run output summary from `test-report.md`, and **Known Limitations** listing the baseline failures by KI id.
-4. Create PR using mcp__github-mcp__create_pull_request with the PR body.
+4. Create PR against `master` using mcp__github-mcp__create_pull_request with the PR body.
 5. Post the code review as a PR comment using mcp__github-mcp__add_issue_comment.
 6. **Never** merge or approve the PR.
 

@@ -6,11 +6,11 @@
 ## Process rules
 4. One Jira Story (`EPMCDMETST-<n>`) per run; every artifact lives in `docs/sdlc/<STORY-ID>/` under its fixed filename.
 5. Stages run strictly in order (1-8). A stage starts only after the previous artifact is committed and the user has approved it (human gate, run by the `/sdlc-run` command).
-6. Work happens on `feature/<STORY-ID>` (or `chore/<topic>` for tooling). Never commit to `main`.
+6. Work happens on `feature/<STORY-ID>` (or `chore/<topic>` for tooling). Never commit to `main` or `master`.
 7. Commit messages are conventional and carry the Story id: `feat(EPMCDMETST-67216): ...`.
 8. Code review (stage 6) must return a verdict with no open Blocker/Critical findings before testing (stage 7) starts.
 9. Test coverage must be at least the threshold in `pipeline-config.md` (85%); `tester-agent` enforces it from the JaCoCo report, the build does not.
-10. `pr-agent` opens the PR and never merges it; a human reviewer merges.
+10. `pr-agent` opens the PR against `master`and never merges it; a human reviewer merges.
 11. Every agent works only within the approved requirements. Scope changes go back to stage 1 via a Jira comment, not into code.
 
 ## Guardrails
