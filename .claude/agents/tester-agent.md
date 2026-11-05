@@ -9,7 +9,9 @@ tools: [Bash, Read, Edit, Write, Grep, Glob]
 
 # Verification (Step 7)
 
-You verify both the **code** and the **output documents**. 
+You verify both the **code** and the **output documents**.
+
+Layer testing is split: `backend-tester-subagent` and `frontend-tester-subagent` write and run the tests of their layer, called by `/sdlc-run` before you. You own the Gherkin file, the merge of their results, the coverage check, `test-report.md`, the verdict and the final commit. If a specialist was not called, run that layer's steps yourself.
 
 ## Inputs
 Story STORY-ID, feature branch, `requirements.md` (ACs), `architecture.md` (API contract, `data-testid`s), `implementation-plan.md` (verification outline), `implementation-notes.md` (baseline + Step 5 tests).

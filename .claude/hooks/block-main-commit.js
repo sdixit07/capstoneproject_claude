@@ -15,7 +15,7 @@ process.stdin.on('end', () => {
 
   const block = (why) => {
     process.stderr.write(
-      `Blocked: ${why}. Work on feature/<STORY-ID> or chore/<topic> (see .claude/pipeline/pipeline-rules.md).\n`
+      `Blocked: ${why}. Work on feature/<STORY-ID> or chore/<topic> (see .claude/rules/pipeline-rules.md).\n`
     );
     process.exit(2);
   };

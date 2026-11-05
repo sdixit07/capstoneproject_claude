@@ -1,5 +1,5 @@
 ---
-name: planner-subagent
+name: planner-agent
 description: Subagent for breaking down architecture into prioritized, dependency-ordered implementation tasks.
 
 model: inherit
