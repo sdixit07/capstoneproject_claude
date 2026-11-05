@@ -42,7 +42,7 @@ reading `ecom-project/target/site/jacoco/`. Do not describe it as build-enforced
 
 Stage order, agents, and artifact names are defined in `.claude/commands/sdlc-run.md`; templates are in
 `.claude/templates/`. Keep artifact filenames unchanged — agents cross-reference them by name.
-Full guardrails: `.claude/pipeline/pipeline-rules.md`; enforceable part: `permissions` in `.claude/settings.json`.
+Full guardrails: `.claude/rules/pipeline-rules.md`; enforceable part: `permissions` in `.claude/settings.json`.
 
 ## Conventions
 

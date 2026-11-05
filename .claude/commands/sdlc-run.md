@@ -59,4 +59,4 @@ stage work yourself and do not skip ahead.
 - **Step 8:** `pr-agent` opens the PR with its five required sections. Never merge it.
 
 Report back the stage reached, the artifacts written, and any gate that blocked. All other rules
-are in `.claude/pipeline/pipeline-rules.md`.
+are in `.claude/rules/pipeline-rules.md`.
