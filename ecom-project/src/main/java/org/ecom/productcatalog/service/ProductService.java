@@ -1,6 +1,7 @@
 package org.ecom.productcatalog.service;
 
 import org.ecom.productcatalog.Product;
+import org.ecom.productcatalog.exception.ProductNotFoundException;
 import org.ecom.productcatalog.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,5 +29,9 @@ public class ProductService {
 
     public List<Product> getProductByCategory(Long categoryId){
         return productRepository.findByCategoryId(categoryId);
+    }
+
+    public Product getProductById(Long id){
+        return productRepository.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
     }
 }
