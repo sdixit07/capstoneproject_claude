@@ -35,5 +35,18 @@ No BLOCKER or MAJOR findings. All FRs, NFRs and ACs are covered, and the design 
 | NFR-3 | No new dependencies | Yes |
 | AC-1 / AC-2 | Two unit tests | Yes |
 
+## Agreed design decisions
+All four decisions were accepted by the user as proposed. Applied to `architecture.md` in commit `7f33e39`.
+
+| Decision | Agreed | Applied in commit | Where applied |
+|----------|--------|-------------------|---------------|
+| D-1 | Agreed as proposed | 7f33e39 | No design change. Recorded in `architecture.md` > Changes after design review (Low-Level Design, Error Handling). |
+| D-2 | Agreed as proposed | 7f33e39 | `architecture.md` > Low-Level Design > Tests: both tests `verify(repo).findById(id)`; AC-2 asserts the exception is unchecked. |
+| D-3 | Agreed as proposed | 7f33e39 | No design change. NFR-2 target is 85%. Recorded in `architecture.md` > Changes after design review (NFR-2 traceability). |
+| D-4 | Agreed as proposed | 7f33e39 | No design change. Carried forward to the implementation notes (import `org.ecom.productcatalog.Product`, new `exception` package) and to the PR's Known Limitations (follow-up controller/404 Story). |
+
+### Correction to F-4
+F-4 stated that `CLAUDE.md` says 75%. That was based on an uncommitted local edit, which is now stashed. The committed `CLAUDE.md` says 85%, which matches `pipeline-config.md` and `pipeline-rules.md`. There is no real inconsistency, so no cleanup is needed. D-3 stands as the 85% target, and its "note the discrepancy for cleanup" part is void.
+
 ## Verdict
-APPROVED WITH CHANGES (only D-2 touches `architecture.md`, and it is minor).
+APPROVED WITH CHANGES. Final: all changes agreed and applied in commit `7f33e39` (only D-2 touched `architecture.md`, and it was minor). No open BLOCKER or MAJOR findings.
