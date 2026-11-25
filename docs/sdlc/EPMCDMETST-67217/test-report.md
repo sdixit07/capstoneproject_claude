@@ -89,9 +89,26 @@ AC coverage: 2/2. No Gherkin file exists (see section 6).
 
 | Id | Severity | Description | Status |
 |---|---|---|---|
-| D-1 | Major | Module line coverage 83.08% < 85% gate (pre-existing shortfall in `Product`, `Category`, `EcomProjectApplication`) | Open, needs user decision |
+| D-1 | Major | Module line coverage 83.08% < 85% gate (pre-existing shortfall in `Product`, `Category`, `EcomProjectApplication`) | Not fixed; accepted by user waiver on 2026-11-25 (see section 9) |
 | D-2 | Minor | No Gherkin feature file for the Story | Open, informational |
 
 ## 8. Verdict
 
-**FAIL (blocked on the coverage gate).** All 33 tests pass, zero new failures versus baseline, 2/2 ACs verified. However, measured module-wide line coverage is 83.08% (108/130), below the required 85%. To close it, cover at least 3 more lines (for example via tests on `Product`/`Category`) or have the user formally change the gate's scope. Tests were not weakened and none were added to reach the number.
+**Raw gate result: FAIL (blocked on the coverage gate).** All 33 tests pass, zero new failures versus baseline, 2/2 ACs verified. However, measured module-wide line coverage is 83.08% (108/130), below the required 85%. This raw result is unchanged. Tests were not weakened and none were added to reach the number.
+
+## 9. User waiver of the coverage gate
+
+- **Ruling:** The user explicitly accepted the measured line coverage of 83.08% (108 of 130 lines), which is below the 85% threshold, and chose to proceed to Step 8.
+- **Given by:** the user, not by an agent, in this session after seeing the FAIL verdict.
+- **Date:** 2026-11-25.
+- **Measured numbers:** unchanged. The gate was not met and is not reclassified as met.
+- **Rationale:**
+  - The shortfall predates this Story (82.7% at baseline).
+  - The code this Story touched, `ProductService` and `ProductNotFoundException`, is at 100% line coverage.
+  - All 22 missed lines are in unrelated classes: `Product` 10, `Category` 10, `EcomProjectApplication` 2.
+- **Integrity:** no tests were added, weakened or deleted to reach the number.
+- **Follow-up:** the PR's Known Limitations section must carry this waiver and the pre-existing coverage gap.
+
+## 10. Final status
+
+**Gate not met, accepted by user waiver (2026-11-25).** Not PASS.
