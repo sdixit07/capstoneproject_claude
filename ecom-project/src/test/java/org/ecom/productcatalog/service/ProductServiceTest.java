@@ -1,6 +1,7 @@
 package org.ecom.productcatalog.service;
 
 import org.ecom.productcatalog.Product;
+import org.ecom.productcatalog.exception.ProductNotFoundException;
 import org.ecom.productcatalog.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -9,9 +10,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,5 +56,23 @@ class ProductServiceTest {
         List<Product> list = List.of(new Product());
         when(repo.findByCategoryId(3L)).thenReturn(list);
         assertEquals(list, service.getProductByCategory(3L));
+    }
+
+    @Test
+    void getProductByIdReturnsProductWhenFound() {
+        Product product = new Product();
+        when(repo.findById(1L)).thenReturn(Optional.of(product));
+        assertSame(product, service.getProductById(1L));
+        verify(repo).findById(1L);
+    }
+
+    @Test
+    void getProductByIdThrowsWhenNotFound() {
+        when(repo.findById(999999L)).thenReturn(Optional.empty());
+        ProductNotFoundException ex = assertThrows(ProductNotFoundException.class,
+                () -> service.getProductById(999999L));
+        assertEquals("Product not found with id: 999999", ex.getMessage());
+        verify(repo).findById(999999L);
+        assertTrue(RuntimeException.class.isAssignableFrom(ProductNotFoundException.class));
     }
 }

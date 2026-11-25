@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- `ProductService.getProductById(Long)` returns the product or throws the new unchecked `ProductNotFoundException` ("Product not found with id: <id>"); service layer only, no endpoint or HTTP 404 mapping yet (EPMCDMETST-67217)
+- Unit and integration tests for `getProductById` covering AC-1 and AC-2 (EPMCDMETST-67217)
 - Previous/Next pagination controls in the React catalog, backed by the paged `GET /api/products` endpoint, with loading, error-rollback and Retry handling (EPMCDMETST-69860)
 - Unit tests for the paging API module and pagination helpers, and a Playwright spec `catalog-pagination-nav.spec.js` (EPMCDMETST-69860)
 - JaCoCo `prepare-agent` and `report` goals in `ecom-project/pom.xml` (EPMCDMETST-69860)
