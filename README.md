@@ -32,6 +32,12 @@ The response is a paged envelope rather than a bare array. The React front end c
 
 ---
 
+## Service layer: product lookup by id
+
+`ProductService.getProductById(Long id)` returns the matching `Product`, or throws the unchecked `ProductNotFoundException` ("Product not found with id: <id>") when none exists. This is a service-layer change only: no new endpoint is exposed and the exception is not yet mapped to HTTP 404 (it would surface as 500 if called from a controller). A controller endpoint and 404 mapping are planned as a follow-up Story. Run its tests with `./mvnw test` from `ecom-project/` (`mvnw.cmd` on Windows).
+
+---
+
 ## Screenshots
 
 ### Product Catalog Website
