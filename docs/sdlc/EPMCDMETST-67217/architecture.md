@@ -64,8 +64,8 @@ empty Optional -> throw ProductNotFoundException("Product not found with id: <id
 - Validation: none beyond Spring Data's null check. No `@Transactional` needed (single read).
 - Errors: `ProductNotFoundException` only; no handler or HTTP mapping in this Story.
 - Tests (extend `ProductServiceTest`, Mockito mock repo, no Spring context):
-  - AC-1: `when(repo.findById(1L)).thenReturn(Optional.of(product))`; assert `assertSame(product, service.getProductById(1L))`.
-  - AC-2: `when(repo.findById(999999L)).thenReturn(Optional.empty())`; `assertThrows(ProductNotFoundException.class, ...)` and assert message `Product not found with id: 999999`.
+  - AC-1: `when(repo.findById(1L)).thenReturn(Optional.of(product))`; assert `assertSame(product, service.getProductById(1L))`; then `verify(repo).findById(1L)`.
+  - AC-2: `when(repo.findById(999999L)).thenReturn(Optional.empty())`; `assertThrows(ProductNotFoundException.class, ...)` and assert message `Product not found with id: 999999`; then `verify(repo).findById(999999L)`. Also assert the exception is unchecked, e.g. `assertTrue(RuntimeException.class.isAssignableFrom(ProductNotFoundException.class))` (D-2).
 
 ### Frontend
 No change: no state, API module, components or `data-testid`s.
@@ -101,3 +101,13 @@ Until a controller advice exists, a caller would surface the exception as HTTP 5
 | NFR-2 | Two tests cover both branches of the new method; exception constructor covered via AC-2 |
 | NFR-3 | No dependency changes; existing tests kept |
 | AC-1 / AC-2 | The two unit tests above |
+
+## Changes after design review
+All four decisions in `design-review.md` were accepted by the user.
+
+| Decision | Outcome | Where |
+|---|---|---|
+| D-1 | Accepted, no change. Design stays as written: single-arg `ProductNotFoundException(Long id)`, `orElseThrow` in the service, no `@Transactional`, no handler. | Low-Level Design, Error Handling |
+| D-2 | Accepted, applied. Both tests now `verify(repo).findById(id)`; AC-2 also asserts the exception is unchecked (`RuntimeException`). | Low-Level Design > Tests |
+| D-3 | Accepted, no change. NFR-2 coverage target is 85% (`pipeline-config.md`, `pipeline-rules.md`, `CLAUDE.md`). The "75%" in F-4 came from an uncommitted edit, so there is no inconsistency to clean up. | NFR-2 traceability |
+| D-4 | Accepted, no change to design. The implementation notes must state the import `org.ecom.productcatalog.Product` and the new `org.ecom.productcatalog.exception` package. The PR's Known Limitations must record the follow-up Story for the controller and 404 mapping. | Implementation notes, PR body |
